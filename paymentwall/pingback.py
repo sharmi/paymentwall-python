@@ -27,11 +27,11 @@ class Pingback(Paymentwall):
         self.parameters = parameters
         self.ip_address = ip_address
 
-    def validate(self, skip_ip_whitelist_check=False):
+    def validate(self, skip_ip_whitelist_check=False, new_ip=False):
         validated = False
 
         if self.is_parameters_valid():
-            if self.is_ip_address_valid() or skip_ip_whitelist_check:
+            if self.is_ip_address_valid(new_ip) or skip_ip_whitelist_check:
                 if self.is_signature_valid():
                     validated = True
                 else:
@@ -69,7 +69,12 @@ class Pingback(Paymentwall):
 
         return signature == signature_calculated
 
-    def is_ip_address_valid(self):
+    def is_ip_address_valid(self, new=False):
+        if new:
+            import ipaddress
+            ip = ipaddress.ip_address(self.ip_address)
+            return ip in ipaddress.ip_network('216.127.71.0/24')
+
         ips_whitelist = [
             '174.36.92.186',
             '174.36.96.66',
